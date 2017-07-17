@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -156,7 +157,7 @@ func main() {
 		renderMarkdownHTML(w, data)
 	})
 
-	log.Printf("all markdown files under %s are served at %s", cwd, *flListenAddr)
+	fmt.Printf("all markdown files under %s are served at %s\n", cwd, *flListenAddr)
 
 	http.ListenAndServe(*flListenAddr, nil)
 }
