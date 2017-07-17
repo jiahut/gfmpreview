@@ -26,3 +26,12 @@ If the default listening port of *3030* does not work for you you have the optio
 Or you can change the listening address completely:
 
     gfmpreview -l "10.0.0.1:4040"
+
+
+If you don't pass a path in the URL *gfmpreview* will render a list of all markdown files relative to the current working directory:
+
+![Listing view](https://vrischmann.me/files/gfmpreview/listing.png)
+
+If you pass a correct path relative to the current working directory *gfmpreview* will do the actual rendering:
+
+![Preview](https://vrischmann.me/files/gfmpreview/preview.png)
