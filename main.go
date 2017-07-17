@@ -17,17 +17,35 @@ import (
 	"github.com/vrischmann/hutil"
 )
 
-func pathForName(paths []string, path string) string {
-	name := filepath.Base(path)
-	for _, el := range paths {
-		if strings.HasSuffix(el, name) {
-			return el
+type paths struct {
+	cwd   string
+	paths []string
+}
+
+func (p *paths) getRealPath(reqPath string) string {
+	for _, el := range p.paths {
+		if !strings.HasSuffix(el, reqPath) {
+			continue
 		}
+
+		return el
 	}
 	return ""
 }
 
-func renderList(w http.ResponseWriter, paths []string) {
+func (p *paths) getRelativePaths() ([]string, error) {
+	paths := make([]string, len(p.paths))
+	for i, el := range p.paths {
+		rel, err := filepath.Rel(p.cwd, el)
+		if err != nil {
+			return nil, err
+		}
+		paths[i] = rel
+	}
+	return paths, nil
+}
+
+func renderList(w http.ResponseWriter, p paths) {
 	const tpl = `
 <!doctype>
 <html>
@@ -41,13 +59,14 @@ func renderList(w http.ResponseWriter, paths []string) {
 
 	tmpl := template.Must(template.New("root").Parse(tpl))
 
-	links := make([]string, len(paths))
-	for i, el := range paths {
-		links[i] = filepath.Base(el)
+	items, err := p.getRelativePaths()
+	if err != nil {
+		hutil.WriteError(w, err)
+		return
 	}
 
 	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, links); err != nil {
+	if err := tmpl.Execute(&buf, items); err != nil {
 		hutil.WriteError(w, err)
 		return
 	}
@@ -96,14 +115,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var paths []string
+	p := paths{cwd: cwd}
 	err = filepath.Walk(cwd, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
 		if strings.HasSuffix(fi.Name(), ".md") {
-			paths = append(paths, path)
+			p.paths = append(p.paths, path)
 		}
 
 		return nil
@@ -117,11 +136,11 @@ func main() {
 	http.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(gfmstyle.Assets)))
 	http.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		if req.URL.Path == "/" {
-			renderList(w, paths)
+			renderList(w, p)
 			return
 		}
 
-		path := pathForName(paths, req.URL.Path)
+		path := p.getRealPath(req.URL.Path)
 		if path == "" {
 			hutil.WriteText(w, http.StatusNotFound, "Not Found")
 			return
