@@ -159,5 +159,8 @@ func main() {
 
 	fmt.Printf("all markdown files under %s are served at %s\n", cwd, *flListenAddr)
 
-	http.ListenAndServe(*flListenAddr, nil)
+	if err := http.ListenAndServe(*flListenAddr, nil); err != nil {
+		fmt.Printf("unable to listen. err=%v\n", err)
+		os.Exit(1)
+	}
 }
