@@ -35,3 +35,8 @@ If you don't pass a path in the URL *gfmpreview* will render a list of all markd
 If you pass a correct path relative to the current working directory *gfmpreview* will do the actual rendering:
 
 ![Preview](https://vrischmann.me/files/gfmpreview/preview.png)
+
+License
+-------
+
+MIT. See the LICENSE file.
