@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -160,8 +161,8 @@ func main() {
 
 	fmt.Printf("all markdown files under %s are served at %s\n", cwd, *flListenAddr)
 
-	addr := strings.Split(*flListenAddr, ":")
-	local := fmt.Sprintf("http://127.0.0.1:%s", addr[1])
+	_, port, err := net.SplitHostPort(*flListenAddr)
+	local := fmt.Sprintf("http://127.0.0.1:%s", port)
 	if err := exec.Command("open", local).Run(); err != nil {
 		log.Fatal(err)
 	}
