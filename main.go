@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -159,8 +160,15 @@ func main() {
 
 	fmt.Printf("all markdown files under %s are served at %s\n", cwd, *flListenAddr)
 
+	addr := strings.Split(*flListenAddr, ":")
+	local := fmt.Sprintf("http://127.0.0.1:%s", addr[1])
+	if err := exec.Command("open", local).Run(); err != nil {
+		log.Fatal(err)
+	}
+
 	if err := http.ListenAndServe(*flListenAddr, nil); err != nil {
 		fmt.Printf("unable to listen. err=%v\n", err)
 		os.Exit(1)
 	}
+
 }
